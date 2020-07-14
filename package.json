@@ -1,0 +1,17 @@
+{
+  "name": "nodejs_mongo_android",
+  "version": "1.0.0",
+  "description": "Node + Mongo+ Android",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bao",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "crypto": "^1.0.1",
+    "express": "^4.17.1",
+    "mongodb": "^3.5.9"
+  }
+}
