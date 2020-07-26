@@ -62,7 +62,7 @@ MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, fu
 
             var insertJson = {
                 'email': email,
-                'password': password,
+                'password': plaint_password,
                 'name': name,
                 'salt': salt
             };
@@ -106,9 +106,10 @@ MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, fu
                         var salt = user.salt;
                         var userName;
                         var userEmail;
-                        var hashed_password = checkHashPassword(userPassword, salt).passwordHash; //Hash password with salt
+                        // var hashed_password = checkHashPassword(userPassword, salt).passwordHash; //Hash password with salt
+                        var userP = user.password;
                         var encrytype_password = user.password;
-                        if (hashed_password == encrytype_password) {
+                        if (userP == encrytype_password) {
                             response.json('Login success');
                             console.log('Login success')
                         } else {
@@ -137,16 +138,24 @@ MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, fu
         //Update user
         app.put('/api/user/update:id', (request, response, next) => {
             var postData = request.body;
+            var plaint_password = postData.password;
+            var hash_data = saltHashPassword(plaint_password);
+
+            var password = hash_data.passwordHash; //save password hash
+            var name = postData.name;
+            var salt = hash_data.salt; //save salt 
             var email = postData.email;
             var db = client.db('test1');
+            var newValue = {$set: {email, password, name}}
             db.collection('user').findOne({ 'email': email }, function(err, user) {
                 if (err) {
                     console.log("toang find user")
                 } else {
                     console.log(user)
-                    db.collection('user').updateOne(user, function(err, obj) {
+                    db.collection('user').updateOne(user, newValue, function(err, obj) {
                         if (err) {
-                            throw err;
+                            response.json("oh fuck: "+err)
+                            throw err;                          
                         } else {
                             console.log("Update success");
                         }
@@ -175,7 +184,6 @@ MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, fu
                     })
                 }
             })
-
         })
 
         //Start server
