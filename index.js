@@ -55,7 +55,7 @@ MongoClient.connect(url, {useNewUrlParser: true, useUnifiedTopology: true}, func
             var hash_data = saltHashPassword(plaint_password);
 
             var password = hash_data.passwordHash; //save password hash
-            var salt = hash_data.salt; //save saly 
+            var salt = hash_data.salt; //save salt 
             var name = postData.name;
             var email = postData.email;
 
@@ -86,10 +86,9 @@ MongoClient.connect(url, {useNewUrlParser: true, useUnifiedTopology: true}, func
         //Login
         app.post('/api/login', (request, response, next) => {
             var postData = request.body;
-            
             var email = postData.email;
             var userPassword = postData.password;
-
+            
             
             var db = client.db('test1');
 
@@ -101,10 +100,24 @@ MongoClient.connect(url, {useNewUrlParser: true, useUnifiedTopology: true}, func
                 } else {
                     db.collection('user').findOne({'email':email}, function(err, user){
                         var salt = user.salt;
+                        var userName;
+                        var userEmail;
                         var hashed_password = checkHashPassword(userPassword, salt).passwordHash; //Hash password with salt
                         var encrytype_password = user.password;
                         if (hashed_password == encrytype_password){
-                            response.json('Login success');
+                            db.collection('user').findOne({'email':email}, function(err, result){
+                                if (err) throw err;
+                                userName = result.name;
+                                userEmail = result.email;
+                                userPass = result.password;
+                                var getJson = {
+                                    'email': userEmail,
+                                    'name':userName    
+                                }; 
+                                console.log(userName)
+                                response.status(200)
+                                response.json(getJson);
+                            })
                             console.log('Login success')
                         } else {
                             response.json('Wrong password');
@@ -115,6 +128,9 @@ MongoClient.connect(url, {useNewUrlParser: true, useUnifiedTopology: true}, func
             })
 
         })
+
+        //get user 
+        
 
         //Start server
         app.listen(3000, ()=>{
